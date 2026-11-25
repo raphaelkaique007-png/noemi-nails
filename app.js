@@ -4,7 +4,7 @@ const demo=SUPABASE_URL.startsWith('COLE_');
 const sb=demo?null:supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
 let cursor=new Date(2026,11,1), selectedDate=null, selectedSlot=null;
 const demoTaken={'2026-12-05':['08:00','10:00','12:00'],'2026-12-12':['09:00','13:00'],'2026-12-19':['08:00','14:00'],'2026-12-26':['10:00','12:00','15:00']};
-const times={5:['20:00'],6:['08:00','10:00','12:00','14:00','15:00'],0:['08:00','10:00','12:00','14:00']};
+const times={5:['20:00'],6:['08:00','10:30','13:30','15:30'],0:['08:00','10:30','14:00']};
 const $=s=>document.querySelector(s); const pad=n=>String(n).padStart(2,'0');
 function iso(d){return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`}
 function slotsFor(d){return times[d.getDay()]||[]}
