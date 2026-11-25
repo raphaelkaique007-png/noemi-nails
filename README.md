@@ -17,8 +17,8 @@ O front-end nunca deve ser usado para considerar o pagamento como aprovado. A co
 
 ### Horários
 Sexta: 20h
-Sábado: 08h, 10h, 12h, 14h, 15h
-Domingo: 08h, 10h, 12h, 14h
+Sábado: 08h, 10:30h, 13:30h, 15:30h
+Domingo: 08h, 10:30h, 14h
 
 Ajuste os tempos em `app.js` caso o intervalo real dos procedimentos seja diferente.
 
