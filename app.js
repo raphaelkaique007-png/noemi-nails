@@ -1,5 +1,5 @@
-const SUPABASE_URL='COLE_SUA_SUPABASE_URL_AQUI';
-const SUPABASE_ANON_KEY='COLE_SUA_SUPABASE_ANON_KEY_AQUI';
+const SUPABASE_URL='https://pbvywzwaujvsjvhlyxvw.supabase.co';
+const SUPABASE_ANON_KEY='sb_publishable_LgCGagd_7UasPNhAaiNDnQ_hKUFM6Dl';
 const demo=SUPABASE_URL.startsWith('COLE_');
 const sb=demo?null:supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
 let cursor=new Date(2026,11,1), selectedDate=null, selectedSlot=null;
@@ -8,7 +8,15 @@ const times={5:['20:00'],6:['08:00','10:30','13:30','15:30'],0:['08:00','10:30',
 const $=s=>document.querySelector(s); const pad=n=>String(n).padStart(2,'0');
 function iso(d){return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`}
 function slotsFor(d){return times[d.getDay()]||[]}
-async function takenFor(date){if(demo)return demoTaken[date]||[]; const {data}=await sb.from('appointments').select('time').eq('date',date).in('status',['paid','confirmed']); return (data||[]).map(x=>x.time.slice(0,5))}
+async function takenFor(date){
+  if(demo)return demoTaken[date]||[];
+  const {data,error}=await sb.rpc('get_taken_times',{p_date:date});
+  if(error){
+    console.error('Erro ao consultar horários:',error);
+    return [];
+  }
+  return (data||[]).map(x=>x.slot_time.slice(0,5));
+}
 async function render(){const y=cursor.getFullYear(),m=cursor.getMonth(); $('#monthLabel').textContent=new Intl.DateTimeFormat('pt-BR',{month:'long',year:'numeric'}).format(cursor).replace(/^./,c=>c.toUpperCase());const first=new Date(y,m,1),last=new Date(y,m+1,0);let html='';for(let i=1;i<first.getDay();i++)html+='<button class="day muted"></button>';for(let d=1;d<=last.getDate();d++){const dt=new Date(y,m,d), key=iso(dt), slots=slotsFor(dt), taken=await takenFor(key), cls=slots.length?(taken.length>=slots.length?'full':'available'):'';html+=`<button class="day ${cls}" data-date="${key}">${d}</button>`}$('#calendar').innerHTML=html;document.querySelectorAll('.day[data-date]').forEach(b=>b.onclick=()=>selectDate(b.dataset.date));}
 async function selectDate(key){selectedDate=key;selectedSlot=null;document.querySelectorAll('.day').forEach(x=>x.classList.toggle('selected',x.dataset.date===key));const dt=new Date(key+'T12:00:00'), slots=slotsFor(dt), taken=await takenFor(key);$('#slots').innerHTML=slots.length?slots.map(t=>`<button class="slot ${taken.includes(t)?'taken':''}" data-time="${t}" ${taken.includes(t)?'disabled':''}>${t.replace(':','h')}</button>`).join(''):'<p class="empty">Não há atendimento neste dia.</p>';document.querySelectorAll('.slot:not(.taken)').forEach(b=>b.onclick=()=>{selectedSlot=b.dataset.time;document.querySelectorAll('.slot').forEach(x=>x.classList.remove('selected'));b.classList.add('selected');$('#reserve').disabled=false});}
 $('#prev').onclick=()=>{cursor.setMonth(cursor.getMonth()-1);render()};$('#next').onclick=()=>{cursor.setMonth(cursor.getMonth()+1);render()};$('#reserve').onclick=()=>{$('#chosen').textContent=`${new Date(selectedDate+'T12:00:00').toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long'})} às ${selectedSlot.replace(':','h')}`;$('#modal').classList.remove('hidden')};$('#close').onclick=()=>$('#modal').classList.add('hidden');
